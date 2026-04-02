@@ -114,6 +114,7 @@
       transform: translateX(-50%); background: #e53935; color: #fff;
       padding: 12px 24px; border-radius: 8px; font-size: 14px;
       z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      max-width: 90%; text-align: center;
     }
     .error-toast.show {
       display: block;
@@ -193,8 +194,8 @@
 
   <div class="error-toast" id="errorToast"></div>
 
-  <!-- GAS送信用の隠しiframe -->
-  <iframe name="gasFrame" style="display:none;"></iframe>
+  <!-- GAS送信用の隠しiframe（sandbox でスクリプト実行を禁止） -->
+  <iframe name="gasFrame" id="gasFrame" style="display:none;" sandbox="allow-same-origin"></iframe>
 
   <script>
     // ================================================================
@@ -204,21 +205,49 @@
     const GAS_ENDPOINT  = 'YOUR_GAS_WEB_APP_URL';
 
     // ================================================================
-    //  LIFF 初期化
+    //  LIFF 初期化（2回目以降の起動にも対応）
     // ================================================================
     let userId = null;
 
     async function initLiff() {
       try {
         await liff.init({ liffId: LIFF_ID });
-        if (!liff.isLoggedIn()) { liff.login(); return; }
-        const profile = await liff.getProfile();
-        userId = profile.userId;
+        console.log('LIFF init OK');
+
+        if (!liff.isLoggedIn()) {
+          console.log('Not logged in → login()');
+          liff.login();
+          return;
+        }
+
+        // プロファイル取得（トークン切れの場合は再ログイン）
+        try {
+          const profile = await liff.getProfile();
+          userId = profile.userId;
+          console.log('Profile OK:', userId);
+        } catch (profileErr) {
+          console.error('Profile failed, re-login:', profileErr);
+          liff.login();
+          return;
+        }
+
       } catch (err) {
-        console.error('LIFF init error:', err);
-        showError('LIFFの初期化に失敗しました');
+        console.error('LIFF init failed:', err);
+
+        // 初期化失敗 → URL をクリーンにして1回だけリトライ
+        // LIFF が URL に付けた古いパラメータ（?liff.state= や #〜）が原因の場合に有効
+        if (!sessionStorage.getItem('liff_retry')) {
+          sessionStorage.setItem('liff_retry', '1');
+          location.replace(location.href.split('?')[0].split('#')[0]);
+          return;
+        }
+
+        // リトライ済みでもダメなら詳細エラーを表示
+        sessionStorage.removeItem('liff_retry');
+        showError('LIFF初期化エラー: ' + (err.message || err));
       }
     }
+
     initLiff();
 
     // ================================================================
@@ -253,17 +282,14 @@
 
     // ================================================================
     //  GAS にデータ送信（hidden iframe + form submit）
-    //  → CORS に一切依存しない確実な方法
     // ================================================================
     function submitToGAS(data) {
       return new Promise((resolve) => {
-        // 動的にフォームを作成
         const form = document.createElement('form');
         form.method  = 'POST';
         form.action  = GAS_ENDPOINT;
-        form.target  = 'gasFrame';   // 隠し iframe に送信
+        form.target  = 'gasFrame';
 
-        // JSON を1つの hidden フィールドに格納
         const input  = document.createElement('input');
         input.type   = 'hidden';
         input.name   = 'payload';
@@ -274,8 +300,12 @@
         form.submit();
         document.body.removeChild(form);
 
-        // GAS の処理時間（スプレッドシート保存 + Push Message）を待つ
-        setTimeout(resolve, 3000);
+        // GAS の処理時間を待った後、iframe をリセットして影響を排除
+        setTimeout(() => {
+          const iframe = document.getElementById('gasFrame');
+          if (iframe) iframe.src = 'about:blank';
+          resolve();
+        }, 3000);
       });
     }
 
@@ -310,6 +340,7 @@
         document.querySelector('.header').style.display = 'none';
         document.getElementById('doneScreen').classList.add('show');
 
+        // 2秒後に LIFF を閉じる
         setTimeout(() => {
           if (liff.isInClient()) liff.closeWindow();
         }, 2000);
@@ -332,7 +363,7 @@
       const t = document.getElementById('errorToast');
       t.textContent = msg;
       t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3000);
+      setTimeout(() => t.classList.remove('show'), 4000);
     }
   </script>
 </body>
