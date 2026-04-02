@@ -40,38 +40,21 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     }
     .form-group label {
-      display: block;
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 4px;
+      display: block; font-size: 14px; font-weight: 700; margin-bottom: 4px;
     }
     .form-group label .required {
-      display: inline-block;
-      background: #e53935;
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 1px 6px;
-      border-radius: 3px;
-      margin-left: 6px;
-      vertical-align: middle;
+      display: inline-block; background: #e53935; color: #fff;
+      font-size: 10px; font-weight: 700; padding: 1px 6px;
+      border-radius: 3px; margin-left: 6px; vertical-align: middle;
     }
     .form-group .description {
-      font-size: 12px;
-      color: #888;
-      margin-bottom: 10px;
-      line-height: 1.5;
+      font-size: 12px; color: #888; margin-bottom: 10px; line-height: 1.5;
     }
     .form-group input[type="text"],
     .form-group input[type="url"] {
-      width: 100%;
-      padding: 12px 14px;
-      font-size: 15px;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      outline: none;
-      transition: border-color 0.2s;
-      -webkit-appearance: none;
+      width: 100%; padding: 12px 14px; font-size: 15px;
+      border: 1.5px solid #ddd; border-radius: 8px;
+      outline: none; transition: border-color 0.2s; -webkit-appearance: none;
     }
     .form-group input:focus {
       border-color: #06c755;
@@ -82,66 +65,44 @@
       box-shadow: 0 0 0 3px rgba(229,57,53,0.10);
     }
     .form-group .error-msg {
-      font-size: 12px;
-      color: #e53935;
-      margin-top: 4px;
-      display: none;
+      font-size: 12px; color: #e53935; margin-top: 4px; display: none;
     }
 
     .keyword-inputs { display: flex; flex-direction: column; gap: 8px; }
     .keyword-row { display: flex; align-items: center; gap: 8px; }
     .keyword-row .kw-num {
-      font-size: 12px;
-      font-weight: 700;
-      color: #06c755;
-      min-width: 16px;
+      font-size: 12px; font-weight: 700; color: #06c755; min-width: 16px;
     }
     .keyword-row input { flex: 1; }
 
     .submit-btn {
-      display: block;
-      width: 100%;
-      padding: 16px;
-      font-size: 16px;
-      font-weight: 700;
-      color: #fff;
+      display: block; width: 100%; padding: 16px;
+      font-size: 16px; font-weight: 700; color: #fff;
       background: linear-gradient(135deg, #06c755, #04a844);
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: opacity 0.2s, transform 0.1s;
-      -webkit-appearance: none;
-      letter-spacing: 1px;
+      border: none; border-radius: 12px; cursor: pointer;
+      margin-top: 8px; transition: opacity 0.2s, transform 0.1s;
+      -webkit-appearance: none; letter-spacing: 1px;
     }
     .submit-btn:active { transform: scale(0.98); opacity: 0.9; }
     .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
 
     .loading-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(255,255,255,0.85);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      gap: 16px;
+      display: none; position: fixed; inset: 0;
+      background: rgba(255,255,255,0.85); z-index: 9999;
+      justify-content: center; align-items: center;
+      flex-direction: column; gap: 16px;
     }
     .loading-overlay.show { display: flex; }
     .spinner {
       width: 40px; height: 40px;
-      border: 4px solid #e0e0e0;
-      border-top-color: #06c755;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      border: 4px solid #e0e0e0; border-top-color: #06c755;
+      border-radius: 50%; animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading-overlay p { font-size: 14px; color: #666; }
 
     .done-screen {
-      display: none;
-      text-align: center;
-      padding: 60px 24px;
+      display: none; text-align: center; padding: 60px 24px;
     }
     .done-screen.show { display: block; }
     .done-icon { font-size: 56px; margin-bottom: 16px; }
@@ -149,17 +110,10 @@
     .done-screen p { font-size: 14px; color: #888; }
 
     .error-toast {
-      display: none;
-      position: fixed;
-      bottom: 24px; left: 50%;
-      transform: translateX(-50%);
-      background: #e53935;
-      color: #fff;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      z-index: 10000;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: none; position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%); background: #e53935; color: #fff;
+      padding: 12px 24px; border-radius: 8px; font-size: 14px;
+      z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     .error-toast.show {
       display: block;
@@ -239,12 +193,15 @@
 
   <div class="error-toast" id="errorToast"></div>
 
+  <!-- GAS送信用の隠しiframe -->
+  <iframe name="gasFrame" style="display:none;"></iframe>
+
   <script>
     // ================================================================
-    //  ★ 設定 ★  ここを自分の値に書き換えてください
+    //  ★ 設定 ★
     // ================================================================
-    const LIFF_ID       = '2009677249-YKA6DXlo';
-    const GAS_ENDPOINT  = 'https://script.google.com/macros/s/AKfycbx4KlEpcBhHPC0nuN13tZeQjSOthfHL5ynNVAVZlwxCVemhwTb7g3BUJNPXZ3gm9hq0Cg/exec';
+    const LIFF_ID       = 'YOUR_LIFF_ID';
+    const GAS_ENDPOINT  = 'YOUR_GAS_WEB_APP_URL';
 
     // ================================================================
     //  LIFF 初期化
@@ -275,10 +232,10 @@
     function validateForm() {
       let ok = true;
       const checks = [
-        { el: 'shopName',  errEl: 'shopNameError', test: v => v.trim() !== '' },
-        { el: 'hpUrl',     errEl: 'hpUrlError',    test: v => isValidUrl(v.trim()) },
-        { el: 'gbpUrl',    errEl: 'gbpUrlError',   test: v => isValidUrl(v.trim()) },
-        { el: 'keyword1',  errEl: 'keywordError',  test: v => v.trim() !== '' },
+        { el: 'shopName', errEl: 'shopNameError', test: v => v.trim() !== '' },
+        { el: 'hpUrl',    errEl: 'hpUrlError',    test: v => isValidUrl(v.trim()) },
+        { el: 'gbpUrl',   errEl: 'gbpUrlError',   test: v => isValidUrl(v.trim()) },
+        { el: 'keyword1', errEl: 'keywordError',   test: v => v.trim() !== '' },
       ];
       checks.forEach(({ el, errEl, test }) => {
         const input = document.getElementById(el);
@@ -292,6 +249,34 @@
         }
       });
       return ok;
+    }
+
+    // ================================================================
+    //  GAS にデータ送信（hidden iframe + form submit）
+    //  → CORS に一切依存しない確実な方法
+    // ================================================================
+    function submitToGAS(data) {
+      return new Promise((resolve) => {
+        // 動的にフォームを作成
+        const form = document.createElement('form');
+        form.method  = 'POST';
+        form.action  = GAS_ENDPOINT;
+        form.target  = 'gasFrame';   // 隠し iframe に送信
+
+        // JSON を1つの hidden フィールドに格納
+        const input  = document.createElement('input');
+        input.type   = 'hidden';
+        input.name   = 'payload';
+        input.value  = JSON.stringify(data);
+        form.appendChild(input);
+
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+
+        // GAS の処理時間（スプレッドシート保存 + Push Message）を待つ
+        setTimeout(resolve, 3000);
+      });
     }
 
     // ================================================================
@@ -318,21 +303,13 @@
       };
 
       try {
-        // GAS にデータ送信（保存 + Push Message は GAS 側で処理）
-        await fetch(GAS_ENDPOINT, {
-          method: 'POST',
-          body: JSON.stringify(payload),
-          mode: 'no-cors'
-        });
+        await submitToGAS(payload);
 
-        // GAS は 302 リダイレクト → 最終的に 200 になるので
-        // リダイレクト後のレスポンスが返る（fetch は自動追跡する）
         showLoading(false);
         document.getElementById('formArea').style.display = 'none';
         document.querySelector('.header').style.display = 'none';
         document.getElementById('doneScreen').classList.add('show');
 
-        // 2秒後に LIFF を閉じる
         setTimeout(() => {
           if (liff.isInClient()) liff.closeWindow();
         }, 2000);
