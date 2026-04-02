@@ -69,7 +69,6 @@
       font-size: 12px; color: #e53935; margin-top: 4px; display: none;
     }
 
-    /* ── ラジオボタン ── */
     .radio-group { display: flex; flex-direction: column; gap: 10px; }
     .radio-group label {
       display: flex; align-items: center;
@@ -86,7 +85,6 @@
     }
     .radio-group.error label { border-color: #e53935; }
 
-    /* ── 画像アップロード ── */
     .file-upload-area {
       border: 2px dashed #ddd;
       border-radius: 10px;
@@ -201,7 +199,7 @@
 </head>
 <body>
 
-  <div class="header">
+  <div class="header" id="headerArea">
     <h1>お申し込みフォーム</h1>
     <p>以下の項目をご入力ください</p>
   </div>
@@ -209,7 +207,6 @@
   <div class="form-container" id="formArea">
     <form id="applicationForm" novalidate>
 
-      <!-- 1. 店舗名 -->
       <div class="form-group">
         <label>店舗名<span class="required">必須</span></label>
         <p class="description">サロン様の店舗名をご入力ください。</p>
@@ -217,7 +214,6 @@
         <p class="error-msg" id="shopNameError">店舗名を入力してください</p>
       </div>
 
-      <!-- 2. 担当者名 -->
       <div class="form-group">
         <label>担当者名<span class="required">必須</span></label>
         <p class="description">ご担当者様のお名前をご入力ください。</p>
@@ -225,7 +221,6 @@
         <p class="error-msg" id="contactNameError">担当者名を入力してください</p>
       </div>
 
-      <!-- 3. 業態 -->
       <div class="form-group">
         <label>業態<span class="required">必須</span></label>
         <p class="description">該当する業態を選択してください。</p>
@@ -239,7 +234,6 @@
         <p class="error-msg" id="businessTypeError">業態を選択してください</p>
       </div>
 
-      <!-- 4. HP / 掲載媒体URL -->
       <div class="form-group">
         <label>HPや掲載媒体のURL<span class="required">必須</span></label>
         <p class="description">ホームページや掲載媒体（ホットペッパー・食べログ・じゃらんなど）のページURLをご入力ください。<br>※口コミボタンを押した際の遷移先となります。</p>
@@ -247,7 +241,6 @@
         <p class="error-msg" id="hpUrlError">有効なURLを入力してください</p>
       </div>
 
-      <!-- 5. Googleビジネスプロフィール URL -->
       <div class="form-group">
         <label>GoogleビジネスプロフィールのURL<span class="required">必須</span></label>
         <p class="description">GoogleビジネスプロフィールのページURLをご入力ください。<br>※口コミボタンを押した際の遷移先となります。</p>
@@ -255,7 +248,6 @@
         <p class="error-msg" id="gbpUrlError">有効なURLを入力してください</p>
       </div>
 
-      <!-- 6. 対策ワード -->
       <div class="form-group">
         <label>対策ワード<span class="required">必須</span></label>
         <p class="description">口コミに必ず含めたいキーワードを最大3つご入力ください。<br>【例】髪質改善 / トリートメント / 表参道</p>
@@ -276,10 +268,9 @@
         <p class="error-msg" id="keywordError">キーワードを1つ以上入力してください</p>
       </div>
 
-      <!-- 7. アイコン画像 -->
       <div class="form-group">
         <label>アイコン<span class="required">必須</span></label>
-        <p class="description">サロンのアイコン画像をアップロードしてください。（5MB以下 / JPG, PNG, WebP）</p>
+        <p class="description">サロンのアイコン画像をアップロードしてください。（10MB以下 / JPG, PNG, WebP）</p>
         <div class="file-upload-area" id="iconUploadArea" onclick="document.getElementById('iconFile').click()">
           <input type="file" id="iconFile" accept="image/jpeg,image/png,image/webp">
           <div class="upload-placeholder" id="iconPlaceholder">
@@ -290,10 +281,9 @@
         <p class="error-msg" id="iconError">アイコン画像を選択してください</p>
       </div>
 
-      <!-- 8. 背景画像 -->
       <div class="form-group">
         <label>背景画像<span class="required">必須</span></label>
-        <p class="description">背景に使用する画像をアップロードしてください。（5MB以下 / JPG, PNG, WebP）</p>
+        <p class="description">背景に使用する画像をアップロードしてください。（10MB以下 / JPG, PNG, WebP）</p>
         <div class="file-upload-area" id="bgUploadArea" onclick="document.getElementById('bgFile').click()">
           <input type="file" id="bgFile" accept="image/jpeg,image/png,image/webp">
           <div class="upload-placeholder" id="bgPlaceholder">
@@ -304,7 +294,7 @@
         <p class="error-msg" id="bgError">背景画像を選択してください</p>
       </div>
 
-      <button type="submit" class="submit-btn" id="submitBtn">送信する</button>
+      <button type="submit" class="submit-btn" id="submitBtn" disabled>LINE認証を確認中...</button>
     </form>
   </div>
 
@@ -321,38 +311,50 @@
 
   <div class="error-toast" id="errorToast"></div>
 
-  <iframe name="gasFrame" id="gasFrame" style="display:none;" sandbox="allow-same-origin"></iframe>
-
   <script>
     // ================================================================
     //  ★ 設定 ★
     // ================================================================
     const LIFF_ID       = '2009677249-YKA6DXlo';
-    const GAS_ENDPOINT  = 'https://script.google.com/macros/s/AKfycbyAvsORVOi7cLJgALzkr3_bn79O3V6wzwJc-4Q4bvM3ddguJpSXR_0a0HoKS3GacXI7xQ/exec';
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 5MB
+    const GAS_ENDPOINT  = 'https://script.google.com/macros/s/AKfycbzANJ8fQBAoDNJStrW7RHX-uZEKvhMZ98fsDG0G6BMekxgJozuU9nCcyrDlaElkGQ1MQw/exec';
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
     // ================================================================
     //  LIFF 初期化
     // ================================================================
     let userId = null;
+    let liffReady = false;
 
     async function initLiff() {
+      const submitBtn = document.getElementById('submitBtn');
+
       try {
         await liff.init({ liffId: LIFF_ID });
-        if (!liff.isLoggedIn()) { liff.login(); return; }
-        try {
-          const profile = await liff.getProfile();
-          userId = profile.userId;
-        } catch (profileErr) {
-          console.error('Profile failed, re-login:', profileErr);
+
+        if (!liff.isLoggedIn()) {
           liff.login();
+          return;
         }
+
+        const profile = await liff.getProfile();
+        userId = profile.userId;
+
+        if (!userId) {
+          throw new Error('LINE userId を取得できませんでした');
+        }
+
+        liffReady = true;
+        submitBtn.disabled = false;
+        submitBtn.textContent = '送信する';
+
       } catch (err) {
         console.error('LIFF init failed:', err);
-        showError('LIFF初期化エラー: ' + (err.message || err));
+        liffReady = false;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'LINE認証エラー';
+        showError('LINE認証に失敗しました。LINEアプリ内で開き直してください。');
       }
     }
-    initLiff();
 
     // ================================================================
     //  画像アップロード UI
@@ -360,30 +362,34 @@
     const imageData = { icon: null, bg: null };
 
     function setupFileUpload(fileInputId, areaId, placeholderId, dataKey) {
-      const fileInput   = document.getElementById(fileInputId);
-      const area        = document.getElementById(areaId);
-      const placeholder = document.getElementById(placeholderId);
+      const fileInput = document.getElementById(fileInputId);
+      const area = document.getElementById(areaId);
+
+      if (!fileInput || !area) return;
 
       fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
         if (file.size > MAX_FILE_SIZE) {
-          showError('画像は5MB以下にしてください');
+          showError('画像は10MB以下にしてください');
           fileInput.value = '';
           return;
         }
 
         const reader = new FileReader();
         reader.onload = (ev) => {
-          const base64Full = ev.target.result;            // data:image/xxx;base64,XXXX
-          const base64Data = base64Full.split(',')[1];    // base64部分のみ
-          const mimeType   = file.type;
-          const fileName   = file.name;
+          const base64Full = ev.target.result;
+          const base64Data = base64Full.split(',')[1];
+          const mimeType = file.type;
+          const fileName = file.name;
 
-          imageData[dataKey] = { base64: base64Data, mimeType, fileName };
+          imageData[dataKey] = {
+            base64: base64Data,
+            mimeType,
+            fileName
+          };
 
-          // プレビュー表示
           area.classList.add('has-file');
           area.innerHTML = `
             <img src="${base64Full}" class="preview-img" alt="プレビュー">
@@ -396,8 +402,10 @@
 
     function removeFile(event, fileInputId, areaId, placeholderId, dataKey) {
       event.stopPropagation();
+
       imageData[dataKey] = null;
-      document.getElementById(fileInputId).value = '';
+      const oldInput = document.getElementById(fileInputId);
+      if (oldInput) oldInput.value = '';
 
       const area = document.getElementById(areaId);
       area.classList.remove('has-file');
@@ -408,20 +416,21 @@
           <div class="upload-text"><span>タップして選択</span></div>
         </div>
       `;
+
       area.onclick = () => document.getElementById(fileInputId).click();
       setupFileUpload(fileInputId, areaId, placeholderId, dataKey);
     }
-
-    // 初期化
-    setupFileUpload('iconFile', 'iconUploadArea', 'iconPlaceholder', 'icon');
-    setupFileUpload('bgFile',   'bgUploadArea',   'bgPlaceholder',   'bg');
 
     // ================================================================
     //  バリデーション
     // ================================================================
     function isValidUrl(str) {
-      try { const u = new URL(str); return u.protocol === 'http:' || u.protocol === 'https:'; }
-      catch { return false; }
+      try {
+        const u = new URL(str);
+        return u.protocol === 'http:' || u.protocol === 'https:';
+      } catch {
+        return false;
+      }
     }
 
     function validateForm() {
@@ -434,6 +443,7 @@
         { el: 'gbpUrl',      errEl: 'gbpUrlError',      test: v => isValidUrl(v.trim()) },
         { el: 'keyword1',    errEl: 'keywordError',     test: v => v.trim() !== '' },
       ];
+
       checks.forEach(({ el, errEl, test }) => {
         const input = document.getElementById(el);
         if (!test(input.value)) {
@@ -446,9 +456,8 @@
         }
       });
 
-      // ラジオボタン
       const radioGroup = document.getElementById('businessTypeGroup');
-      const selected   = document.querySelector('input[name="businessType"]:checked');
+      const selected = document.querySelector('input[name="businessType"]:checked');
       if (!selected) {
         radioGroup.classList.add('error');
         document.getElementById('businessTypeError').style.display = 'block';
@@ -458,7 +467,6 @@
         document.getElementById('businessTypeError').style.display = 'none';
       }
 
-      // 画像チェック
       const iconArea = document.getElementById('iconUploadArea');
       if (!imageData.icon) {
         iconArea.classList.add('error');
@@ -485,30 +493,32 @@
     // ================================================================
     //  GAS にデータ送信
     // ================================================================
-    function submitToGAS(data) {
-      return new Promise((resolve) => {
-        const form = document.createElement('form');
-        form.method  = 'POST';
-        form.action  = GAS_ENDPOINT;
-        form.target  = 'gasFrame';
+    async function submitToGAS(data) {
+      const formData = new URLSearchParams();
+      formData.append('payload', JSON.stringify(data));
 
-        const input  = document.createElement('input');
-        input.type   = 'hidden';
-        input.name   = 'payload';
-        input.value  = JSON.stringify(data);
-        form.appendChild(input);
-
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
-
-        // 画像ありなので処理時間を長めに（8秒）
-        setTimeout(() => {
-          const iframe = document.getElementById('gasFrame');
-          if (iframe) iframe.src = 'about:blank';
-          resolve();
-        }, 8000);
+      const response = await fetch(GAS_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        body: formData.toString()
       });
+
+      const text = await response.text();
+
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (e) {
+        throw new Error('GASからJSON形式の応答が返ってきませんでした: ' + text);
+      }
+
+      if (!json.ok) {
+        throw new Error(json.error || '送信に失敗しました');
+      }
+
+      return json;
     }
 
     // ================================================================
@@ -516,6 +526,12 @@
     // ================================================================
     document.getElementById('applicationForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      if (!liffReady || !userId) {
+        showError('LINE認証が完了していません。LINEアプリ内で開き直してください。');
+        return;
+      }
+
       if (!validateForm()) return;
 
       const submitBtn = document.getElementById('submitBtn');
@@ -523,12 +539,12 @@
       showLoading(true);
 
       const payload = {
-        userId,
-        shopName:     document.getElementById('shopName').value.trim(),
-        contactName:  document.getElementById('contactName').value.trim(),
+        userId: userId,
+        shopName: document.getElementById('shopName').value.trim(),
+        contactName: document.getElementById('contactName').value.trim(),
         businessType: document.querySelector('input[name="businessType"]:checked').value,
-        hpUrl:        document.getElementById('hpUrl').value.trim(),
-        gbpUrl:       document.getElementById('gbpUrl').value.trim(),
+        hpUrl: document.getElementById('hpUrl').value.trim(),
+        gbpUrl: document.getElementById('gbpUrl').value.trim(),
         keywords: [
           document.getElementById('keyword1').value.trim(),
           document.getElementById('keyword2').value.trim(),
@@ -539,22 +555,30 @@
       };
 
       try {
-        await submitToGAS(payload);
+        const result = await submitToGAS(payload);
+        console.log('GAS result:', result);
 
         showLoading(false);
         document.getElementById('formArea').style.display = 'none';
-        document.querySelector('.header').style.display = 'none';
+        document.getElementById('headerArea').style.display = 'none';
         document.getElementById('doneScreen').classList.add('show');
 
         setTimeout(() => {
-          if (liff.isInClient()) liff.closeWindow();
+          try {
+            if (liff.isInClient()) {
+              liff.closeWindow();
+            }
+          } catch (e) {
+            console.error(e);
+          }
         }, 2000);
 
       } catch (err) {
         console.error('Submit error:', err);
         showLoading(false);
         submitBtn.disabled = false;
-        showError('送信に失敗しました。もう一度お試しください。');
+        submitBtn.textContent = '送信する';
+        showError(err.message || '送信に失敗しました。もう一度お試しください。');
       }
     });
 
@@ -564,12 +588,20 @@
     function showLoading(flag) {
       document.getElementById('loading').classList.toggle('show', flag);
     }
+
     function showError(msg) {
       const t = document.getElementById('errorToast');
       t.textContent = msg;
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 4000);
     }
+
+    // ================================================================
+    //  初期化
+    // ================================================================
+    setupFileUpload('iconFile', 'iconUploadArea', 'iconPlaceholder', 'icon');
+    setupFileUpload('bgFile', 'bgUploadArea', 'bgPlaceholder', 'bg');
+    initLiff();
   </script>
 </body>
 </html>
