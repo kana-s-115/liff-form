@@ -39,10 +39,10 @@
       margin-bottom: 14px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     }
-    .form-group label {
+    .form-group > label:first-child {
       display: block; font-size: 14px; font-weight: 700; margin-bottom: 4px;
     }
-    .form-group label .required {
+    .form-group .required {
       display: inline-block; background: #e53935; color: #fff;
       font-size: 10px; font-weight: 700; padding: 1px 6px;
       border-radius: 3px; margin-left: 6px; vertical-align: middle;
@@ -60,7 +60,8 @@
       border-color: #06c755;
       box-shadow: 0 0 0 3px rgba(6,199,85,0.12);
     }
-    .form-group input.error {
+    .form-group input.error,
+    .form-group .file-upload-area.error {
       border-color: #e53935;
       box-shadow: 0 0 0 3px rgba(229,57,53,0.10);
     }
@@ -69,35 +70,78 @@
     }
 
     /* ── ラジオボタン ── */
-    .radio-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+    .radio-group { display: flex; flex-direction: column; gap: 10px; }
     .radio-group label {
-      display: flex;
-      align-items: center;
-      font-size: 15px;
-      font-weight: 400;
-      cursor: pointer;
-      padding: 10px 12px;
-      border: 1.5px solid #eee;
-      border-radius: 8px;
+      display: flex; align-items: center;
+      font-size: 15px; font-weight: 400; cursor: pointer;
+      padding: 10px 12px; border: 1.5px solid #eee; border-radius: 8px;
       transition: border-color 0.2s, background 0.2s;
     }
     .radio-group label:has(input:checked) {
-      border-color: #06c755;
-      background: rgba(6,199,85,0.05);
+      border-color: #06c755; background: rgba(6,199,85,0.05);
     }
     .radio-group input[type="radio"] {
-      width: 18px;
-      height: 18px;
-      margin-right: 10px;
-      accent-color: #06c755;
-      flex-shrink: 0;
+      width: 18px; height: 18px; margin-right: 10px;
+      accent-color: #06c755; flex-shrink: 0;
     }
-    .radio-group.error label {
-      border-color: #e53935;
+    .radio-group.error label { border-color: #e53935; }
+
+    /* ── 画像アップロード ── */
+    .file-upload-area {
+      border: 2px dashed #ddd;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .file-upload-area:hover,
+    .file-upload-area.dragover {
+      border-color: #06c755;
+      background: rgba(6,199,85,0.03);
+    }
+    .file-upload-area.has-file {
+      border-style: solid;
+      border-color: #06c755;
+      padding: 10px;
+    }
+    .file-upload-area input[type="file"] {
+      display: none;
+    }
+    .file-upload-area .upload-icon {
+      font-size: 32px;
+      margin-bottom: 6px;
+    }
+    .file-upload-area .upload-text {
+      font-size: 13px;
+      color: #999;
+    }
+    .file-upload-area .upload-text span {
+      color: #06c755;
+      font-weight: 700;
+    }
+    .file-upload-area .preview-img {
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+    .file-upload-area .remove-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .keyword-inputs { display: flex; flex-direction: column; gap: 8px; }
@@ -133,9 +177,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading-overlay p { font-size: 14px; color: #666; }
 
-    .done-screen {
-      display: none; text-align: center; padding: 60px 24px;
-    }
+    .done-screen { display: none; text-align: center; padding: 60px 24px; }
     .done-screen.show { display: block; }
     .done-icon { font-size: 56px; margin-bottom: 16px; }
     .done-screen h2 { font-size: 20px; color: #06c755; margin-bottom: 8px; }
@@ -149,8 +191,7 @@
       max-width: 90%; text-align: center;
     }
     .error-toast.show {
-      display: block;
-      animation: fadeInUp 0.3s ease;
+      display: block; animation: fadeInUp 0.3s ease;
     }
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateX(-50%) translateY(10px); }
@@ -235,6 +276,34 @@
         <p class="error-msg" id="keywordError">キーワードを1つ以上入力してください</p>
       </div>
 
+      <!-- 7. アイコン画像 -->
+      <div class="form-group">
+        <label>アイコン<span class="required">必須</span></label>
+        <p class="description">サロンのアイコン画像をアップロードしてください。（5MB以下 / JPG, PNG, WebP）</p>
+        <div class="file-upload-area" id="iconUploadArea" onclick="document.getElementById('iconFile').click()">
+          <input type="file" id="iconFile" accept="image/jpeg,image/png,image/webp">
+          <div class="upload-placeholder" id="iconPlaceholder">
+            <div class="upload-icon">🖼️</div>
+            <div class="upload-text"><span>タップして選択</span></div>
+          </div>
+        </div>
+        <p class="error-msg" id="iconError">アイコン画像を選択してください</p>
+      </div>
+
+      <!-- 8. 背景画像 -->
+      <div class="form-group">
+        <label>背景画像<span class="required">必須</span></label>
+        <p class="description">背景に使用する画像をアップロードしてください。（5MB以下 / JPG, PNG, WebP）</p>
+        <div class="file-upload-area" id="bgUploadArea" onclick="document.getElementById('bgFile').click()">
+          <input type="file" id="bgFile" accept="image/jpeg,image/png,image/webp">
+          <div class="upload-placeholder" id="bgPlaceholder">
+            <div class="upload-icon">🖼️</div>
+            <div class="upload-text"><span>タップして選択</span></div>
+          </div>
+        </div>
+        <p class="error-msg" id="bgError">背景画像を選択してください</p>
+      </div>
+
       <button type="submit" class="submit-btn" id="submitBtn">送信する</button>
     </form>
   </div>
@@ -252,15 +321,15 @@
 
   <div class="error-toast" id="errorToast"></div>
 
-  <!-- GAS送信用の隠しiframe -->
   <iframe name="gasFrame" id="gasFrame" style="display:none;" sandbox="allow-same-origin"></iframe>
 
   <script>
     // ================================================================
     //  ★ 設定 ★
     // ================================================================
-    const LIFF_ID       = '2009677249-YKA6DXlo';
+    const LIFF_ID       = 'Y2009677249-YKA6DXlo';
     const GAS_ENDPOINT  = 'https://script.google.com/macros/s/AKfycbx4KlEpcBhHPC0nuN13tZeQjSOthfHL5ynNVAVZlwxCVemhwTb7g3BUJNPXZ3gm9hq0Cg/exec';
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
     // ================================================================
     //  LIFF 初期化
@@ -270,12 +339,7 @@
     async function initLiff() {
       try {
         await liff.init({ liffId: LIFF_ID });
-
-        if (!liff.isLoggedIn()) {
-          liff.login();
-          return;
-        }
-
+        if (!liff.isLoggedIn()) { liff.login(); return; }
         try {
           const profile = await liff.getProfile();
           userId = profile.userId;
@@ -283,14 +347,74 @@
           console.error('Profile failed, re-login:', profileErr);
           liff.login();
         }
-
       } catch (err) {
         console.error('LIFF init failed:', err);
         showError('LIFF初期化エラー: ' + (err.message || err));
       }
     }
-
     initLiff();
+
+    // ================================================================
+    //  画像アップロード UI
+    // ================================================================
+    const imageData = { icon: null, bg: null };
+
+    function setupFileUpload(fileInputId, areaId, placeholderId, dataKey) {
+      const fileInput   = document.getElementById(fileInputId);
+      const area        = document.getElementById(areaId);
+      const placeholder = document.getElementById(placeholderId);
+
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.size > MAX_FILE_SIZE) {
+          showError('画像は5MB以下にしてください');
+          fileInput.value = '';
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const base64Full = ev.target.result;            // data:image/xxx;base64,XXXX
+          const base64Data = base64Full.split(',')[1];    // base64部分のみ
+          const mimeType   = file.type;
+          const fileName   = file.name;
+
+          imageData[dataKey] = { base64: base64Data, mimeType, fileName };
+
+          // プレビュー表示
+          area.classList.add('has-file');
+          area.innerHTML = `
+            <img src="${base64Full}" class="preview-img" alt="プレビュー">
+            <button type="button" class="remove-btn" onclick="removeFile(event, '${fileInputId}', '${areaId}', '${placeholderId}', '${dataKey}')">✕</button>
+          `;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function removeFile(event, fileInputId, areaId, placeholderId, dataKey) {
+      event.stopPropagation();
+      imageData[dataKey] = null;
+      document.getElementById(fileInputId).value = '';
+
+      const area = document.getElementById(areaId);
+      area.classList.remove('has-file');
+      area.innerHTML = `
+        <input type="file" id="${fileInputId}" accept="image/jpeg,image/png,image/webp">
+        <div class="upload-placeholder" id="${placeholderId}">
+          <div class="upload-icon">🖼️</div>
+          <div class="upload-text"><span>タップして選択</span></div>
+        </div>
+      `;
+      area.onclick = () => document.getElementById(fileInputId).click();
+      setupFileUpload(fileInputId, areaId, placeholderId, dataKey);
+    }
+
+    // 初期化
+    setupFileUpload('iconFile', 'iconUploadArea', 'iconPlaceholder', 'icon');
+    setupFileUpload('bgFile',   'bgUploadArea',   'bgPlaceholder',   'bg');
 
     // ================================================================
     //  バリデーション
@@ -303,7 +427,6 @@
     function validateForm() {
       let ok = true;
 
-      // テキスト & URL チェック
       const checks = [
         { el: 'shopName',    errEl: 'shopNameError',    test: v => v.trim() !== '' },
         { el: 'contactName', errEl: 'contactNameError', test: v => v.trim() !== '' },
@@ -323,7 +446,7 @@
         }
       });
 
-      // ラジオボタン チェック
+      // ラジオボタン
       const radioGroup = document.getElementById('businessTypeGroup');
       const selected   = document.querySelector('input[name="businessType"]:checked');
       if (!selected) {
@@ -335,11 +458,32 @@
         document.getElementById('businessTypeError').style.display = 'none';
       }
 
+      // 画像チェック
+      const iconArea = document.getElementById('iconUploadArea');
+      if (!imageData.icon) {
+        iconArea.classList.add('error');
+        document.getElementById('iconError').style.display = 'block';
+        ok = false;
+      } else {
+        iconArea.classList.remove('error');
+        document.getElementById('iconError').style.display = 'none';
+      }
+
+      const bgArea = document.getElementById('bgUploadArea');
+      if (!imageData.bg) {
+        bgArea.classList.add('error');
+        document.getElementById('bgError').style.display = 'block';
+        ok = false;
+      } else {
+        bgArea.classList.remove('error');
+        document.getElementById('bgError').style.display = 'none';
+      }
+
       return ok;
     }
 
     // ================================================================
-    //  GAS にデータ送信（hidden iframe + form submit）
+    //  GAS にデータ送信
     // ================================================================
     function submitToGAS(data) {
       return new Promise((resolve) => {
@@ -358,11 +502,12 @@
         form.submit();
         document.body.removeChild(form);
 
+        // 画像ありなので処理時間を長めに（8秒）
         setTimeout(() => {
           const iframe = document.getElementById('gasFrame');
           if (iframe) iframe.src = 'about:blank';
           resolve();
-        }, 3000);
+        }, 8000);
       });
     }
 
@@ -388,7 +533,9 @@
           document.getElementById('keyword1').value.trim(),
           document.getElementById('keyword2').value.trim(),
           document.getElementById('keyword3').value.trim()
-        ].filter(Boolean)
+        ].filter(Boolean),
+        icon: imageData.icon,
+        bgImage: imageData.bg
       };
 
       try {
