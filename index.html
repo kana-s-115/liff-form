@@ -319,10 +319,10 @@
 
       try {
         // GAS にデータ送信（保存 + Push Message は GAS 側で処理）
-        const res = await fetch(GAS_ENDPOINT, {
+        await fetch(GAS_ENDPOINT, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          mode: 'no-cors'
         });
 
         // GAS は 302 リダイレクト → 最終的に 200 になるので
