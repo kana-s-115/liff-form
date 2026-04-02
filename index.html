@@ -68,6 +68,38 @@
       font-size: 12px; color: #e53935; margin-top: 4px; display: none;
     }
 
+    /* ── ラジオボタン ── */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      font-size: 15px;
+      font-weight: 400;
+      cursor: pointer;
+      padding: 10px 12px;
+      border: 1.5px solid #eee;
+      border-radius: 8px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .radio-group label:has(input:checked) {
+      border-color: #06c755;
+      background: rgba(6,199,85,0.05);
+    }
+    .radio-group input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      margin-right: 10px;
+      accent-color: #06c755;
+      flex-shrink: 0;
+    }
+    .radio-group.error label {
+      border-color: #e53935;
+    }
+
     .keyword-inputs { display: flex; flex-direction: column; gap: 8px; }
     .keyword-row { display: flex; align-items: center; gap: 8px; }
     .keyword-row .kw-num {
@@ -129,13 +161,14 @@
 <body>
 
   <div class="header">
-    <h1>📋 お申し込みフォーム</h1>
+    <h1>お申し込みフォーム</h1>
     <p>以下の項目をご入力ください</p>
   </div>
 
   <div class="form-container" id="formArea">
     <form id="applicationForm" novalidate>
 
+      <!-- 1. 店舗名 -->
       <div class="form-group">
         <label>店舗名<span class="required">必須</span></label>
         <p class="description">サロン様の店舗名をご入力ください。</p>
@@ -143,6 +176,29 @@
         <p class="error-msg" id="shopNameError">店舗名を入力してください</p>
       </div>
 
+      <!-- 2. 担当者名 -->
+      <div class="form-group">
+        <label>担当者名<span class="required">必須</span></label>
+        <p class="description">ご担当者様のお名前をご入力ください。</p>
+        <input type="text" id="contactName" placeholder="例：山田 太郎" required>
+        <p class="error-msg" id="contactNameError">担当者名を入力してください</p>
+      </div>
+
+      <!-- 3. 業態 -->
+      <div class="form-group">
+        <label>業態<span class="required">必須</span></label>
+        <p class="description">該当する業態を選択してください。</p>
+        <div class="radio-group" id="businessTypeGroup">
+          <label><input type="radio" name="businessType" value="ヘアサロン">ヘアサロン</label>
+          <label><input type="radio" name="businessType" value="ネイル">ネイル</label>
+          <label><input type="radio" name="businessType" value="アイラッシュ">アイラッシュ</label>
+          <label><input type="radio" name="businessType" value="エステ">エステ</label>
+          <label><input type="radio" name="businessType" value="リラクゼーション">リラクゼーション</label>
+        </div>
+        <p class="error-msg" id="businessTypeError">業態を選択してください</p>
+      </div>
+
+      <!-- 4. HP / 掲載媒体URL -->
       <div class="form-group">
         <label>HPや掲載媒体のURL<span class="required">必須</span></label>
         <p class="description">ホームページや掲載媒体（ホットペッパー・食べログ・じゃらんなど）のページURLをご入力ください。<br>※口コミボタンを押した際の遷移先となります。</p>
@@ -150,6 +206,7 @@
         <p class="error-msg" id="hpUrlError">有効なURLを入力してください</p>
       </div>
 
+      <!-- 5. Googleビジネスプロフィール URL -->
       <div class="form-group">
         <label>GoogleビジネスプロフィールのURL<span class="required">必須</span></label>
         <p class="description">GoogleビジネスプロフィールのページURLをご入力ください。<br>※口コミボタンを押した際の遷移先となります。</p>
@@ -157,6 +214,7 @@
         <p class="error-msg" id="gbpUrlError">有効なURLを入力してください</p>
       </div>
 
+      <!-- 6. 対策ワード -->
       <div class="form-group">
         <label>対策ワード<span class="required">必須</span></label>
         <p class="description">口コミに必ず含めたいキーワードを最大3つご入力ください。<br>【例】髪質改善 / トリートメント / 表参道</p>
@@ -194,7 +252,7 @@
 
   <div class="error-toast" id="errorToast"></div>
 
-  <!-- GAS送信用の隠しiframe（sandbox でスクリプト実行を禁止） -->
+  <!-- GAS送信用の隠しiframe -->
   <iframe name="gasFrame" id="gasFrame" style="display:none;" sandbox="allow-same-origin"></iframe>
 
   <script>
@@ -205,45 +263,29 @@
     const GAS_ENDPOINT  = 'https://script.google.com/macros/s/AKfycbx4KlEpcBhHPC0nuN13tZeQjSOthfHL5ynNVAVZlwxCVemhwTb7g3BUJNPXZ3gm9hq0Cg/exec';
 
     // ================================================================
-    //  LIFF 初期化（2回目以降の起動にも対応）
+    //  LIFF 初期化
     // ================================================================
     let userId = null;
 
     async function initLiff() {
       try {
         await liff.init({ liffId: LIFF_ID });
-        console.log('LIFF init OK');
 
         if (!liff.isLoggedIn()) {
-          console.log('Not logged in → login()');
           liff.login();
           return;
         }
 
-        // プロファイル取得（トークン切れの場合は再ログイン）
         try {
           const profile = await liff.getProfile();
           userId = profile.userId;
-          console.log('Profile OK:', userId);
         } catch (profileErr) {
           console.error('Profile failed, re-login:', profileErr);
           liff.login();
-          return;
         }
 
       } catch (err) {
         console.error('LIFF init failed:', err);
-
-        // 初期化失敗 → URL をクリーンにして1回だけリトライ
-        // LIFF が URL に付けた古いパラメータ（?liff.state= や #〜）が原因の場合に有効
-        if (!sessionStorage.getItem('liff_retry')) {
-          sessionStorage.setItem('liff_retry', '1');
-          location.replace(location.href.split('?')[0].split('#')[0]);
-          return;
-        }
-
-        // リトライ済みでもダメなら詳細エラーを表示
-        sessionStorage.removeItem('liff_retry');
         showError('LIFF初期化エラー: ' + (err.message || err));
       }
     }
@@ -260,11 +302,14 @@
 
     function validateForm() {
       let ok = true;
+
+      // テキスト & URL チェック
       const checks = [
-        { el: 'shopName', errEl: 'shopNameError', test: v => v.trim() !== '' },
-        { el: 'hpUrl',    errEl: 'hpUrlError',    test: v => isValidUrl(v.trim()) },
-        { el: 'gbpUrl',   errEl: 'gbpUrlError',   test: v => isValidUrl(v.trim()) },
-        { el: 'keyword1', errEl: 'keywordError',   test: v => v.trim() !== '' },
+        { el: 'shopName',    errEl: 'shopNameError',    test: v => v.trim() !== '' },
+        { el: 'contactName', errEl: 'contactNameError', test: v => v.trim() !== '' },
+        { el: 'hpUrl',       errEl: 'hpUrlError',       test: v => isValidUrl(v.trim()) },
+        { el: 'gbpUrl',      errEl: 'gbpUrlError',      test: v => isValidUrl(v.trim()) },
+        { el: 'keyword1',    errEl: 'keywordError',     test: v => v.trim() !== '' },
       ];
       checks.forEach(({ el, errEl, test }) => {
         const input = document.getElementById(el);
@@ -277,6 +322,19 @@
           document.getElementById(errEl).style.display = 'none';
         }
       });
+
+      // ラジオボタン チェック
+      const radioGroup = document.getElementById('businessTypeGroup');
+      const selected   = document.querySelector('input[name="businessType"]:checked');
+      if (!selected) {
+        radioGroup.classList.add('error');
+        document.getElementById('businessTypeError').style.display = 'block';
+        ok = false;
+      } else {
+        radioGroup.classList.remove('error');
+        document.getElementById('businessTypeError').style.display = 'none';
+      }
+
       return ok;
     }
 
@@ -300,7 +358,6 @@
         form.submit();
         document.body.removeChild(form);
 
-        // GAS の処理時間を待った後、iframe をリセットして影響を排除
         setTimeout(() => {
           const iframe = document.getElementById('gasFrame');
           if (iframe) iframe.src = 'about:blank';
@@ -322,9 +379,11 @@
 
       const payload = {
         userId,
-        shopName: document.getElementById('shopName').value.trim(),
-        hpUrl:    document.getElementById('hpUrl').value.trim(),
-        gbpUrl:   document.getElementById('gbpUrl').value.trim(),
+        shopName:     document.getElementById('shopName').value.trim(),
+        contactName:  document.getElementById('contactName').value.trim(),
+        businessType: document.querySelector('input[name="businessType"]:checked').value,
+        hpUrl:        document.getElementById('hpUrl').value.trim(),
+        gbpUrl:       document.getElementById('gbpUrl').value.trim(),
         keywords: [
           document.getElementById('keyword1').value.trim(),
           document.getElementById('keyword2').value.trim(),
@@ -340,7 +399,6 @@
         document.querySelector('.header').style.display = 'none';
         document.getElementById('doneScreen').classList.add('show');
 
-        // 2秒後に LIFF を閉じる
         setTimeout(() => {
           if (liff.isInClient()) liff.closeWindow();
         }, 2000);
