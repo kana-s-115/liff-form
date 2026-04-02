@@ -236,21 +236,21 @@
 
       <div class="form-group">
         <label>HPや掲載媒体のURL<span class="required">必須</span></label>
-        <p class="description">ホームページや掲載媒体（ホットペッパー・食べログ・じゃらんなど）のページURLをご入力ください。<br>※口コミボタンを押した際の遷移先となります。</p>
+        <p class="description">ホームページや掲載媒体のURLをご入力ください。</p>
         <input type="url" id="hpUrl" placeholder="https://example.com" required>
         <p class="error-msg" id="hpUrlError">有効なURLを入力してください</p>
       </div>
 
       <div class="form-group">
         <label>GoogleビジネスプロフィールのURL<span class="required">必須</span></label>
-        <p class="description">GoogleビジネスプロフィールのページURLをご入力ください。<br>※口コミボタンを押した際の遷移先となります。</p>
+        <p class="description">GoogleビジネスプロフィールのページURLをご入力ください。</p>
         <input type="url" id="gbpUrl" placeholder="https://g.page/..." required>
         <p class="error-msg" id="gbpUrlError">有効なURLを入力してください</p>
       </div>
 
       <div class="form-group">
         <label>対策ワード<span class="required">必須</span></label>
-        <p class="description">口コミに必ず含めたいキーワードを最大3つご入力ください。<br>【例】髪質改善 / トリートメント / 表参道</p>
+        <p class="description">口コミに必ず含めたいキーワードを最大3つご入力ください。</p>
         <div class="keyword-inputs">
           <div class="keyword-row">
             <span class="kw-num">1.</span>
@@ -270,7 +270,7 @@
 
       <div class="form-group">
         <label>アイコン<span class="required">必須</span></label>
-        <p class="description">サロンのアイコン画像をアップロードしてください。（10MB以下 / JPG, PNG, WebP）</p>
+        <p class="description">サロンのアイコン画像をアップロードしてください。（5MB以下 / JPG, PNG, WebP）</p>
         <div class="file-upload-area" id="iconUploadArea" onclick="document.getElementById('iconFile').click()">
           <input type="file" id="iconFile" accept="image/jpeg,image/png,image/webp">
           <div class="upload-placeholder" id="iconPlaceholder">
@@ -283,7 +283,7 @@
 
       <div class="form-group">
         <label>背景画像<span class="required">必須</span></label>
-        <p class="description">背景に使用する画像をアップロードしてください。（10MB以下 / JPG, PNG, WebP）</p>
+        <p class="description">背景に使用する画像をアップロードしてください。（5MB以下 / JPG, PNG, WebP）</p>
         <div class="file-upload-area" id="bgUploadArea" onclick="document.getElementById('bgFile').click()">
           <input type="file" id="bgFile" accept="image/jpeg,image/png,image/webp">
           <div class="upload-placeholder" id="bgPlaceholder">
@@ -300,8 +300,8 @@
 
   <div class="done-screen" id="doneScreen">
     <div class="done-icon">✅</div>
-    <h2>送信が完了しました</h2>
-    <p>お申し込みありがとうございます。<br>LINEに確認メッセージをお送りしました。</p>
+    <h2>送信を受け付けました</h2>
+    <p>処理に数秒かかる場合があります。<br>LINE返信をご確認ください。</p>
   </div>
 
   <div class="loading-overlay" id="loading">
@@ -311,23 +311,19 @@
 
   <div class="error-toast" id="errorToast"></div>
 
-  <script>
-    // ================================================================
-    //  ★ 設定 ★
-    // ================================================================
-    const LIFF_ID       = '2009677249-YKA6DXlo';
-    const GAS_ENDPOINT  = 'https://script.google.com/macros/s/AKfycbzANJ8fQBAoDNJStrW7RHX-uZEKvhMZ98fsDG0G6BMekxgJozuU9nCcyrDlaElkGQ1MQw/exec';
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  <iframe name="gasFrame" id="gasFrame" style="display:none;"></iframe>
 
-    // ================================================================
-    //  LIFF 初期化
-    // ================================================================
+  <script>
+    const LIFF_ID      = '2009677249-YKA6DXlo';
+    const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzANJ8fQBAoDNJStrW7RHX-uZEKvhMZ98fsDG0G6BMekxgJozuU9nCcyrDlaElkGQ1MQw/exec';
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
     let userId = null;
     let liffReady = false;
+    const imageData = { icon: null, bg: null };
 
     async function initLiff() {
       const submitBtn = document.getElementById('submitBtn');
-
       try {
         await liff.init({ liffId: LIFF_ID });
 
@@ -346,33 +342,25 @@
         liffReady = true;
         submitBtn.disabled = false;
         submitBtn.textContent = '送信する';
-
       } catch (err) {
         console.error('LIFF init failed:', err);
         liffReady = false;
         submitBtn.disabled = true;
         submitBtn.textContent = 'LINE認証エラー';
-        showError('LINE認証に失敗しました。LINEアプリ内で開き直してください。');
+        showError('LINEアプリ内で開き直してください');
       }
     }
-
-    // ================================================================
-    //  画像アップロード UI
-    // ================================================================
-    const imageData = { icon: null, bg: null };
 
     function setupFileUpload(fileInputId, areaId, placeholderId, dataKey) {
       const fileInput = document.getElementById(fileInputId);
       const area = document.getElementById(areaId);
-
-      if (!fileInput || !area) return;
 
       fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
         if (file.size > MAX_FILE_SIZE) {
-          showError('画像は10MB以下にしてください');
+          showError('画像は5MB以下にしてください');
           fileInput.value = '';
           return;
         }
@@ -384,11 +372,7 @@
           const mimeType = file.type;
           const fileName = file.name;
 
-          imageData[dataKey] = {
-            base64: base64Data,
-            mimeType,
-            fileName
-          };
+          imageData[dataKey] = { base64: base64Data, mimeType, fileName };
 
           area.classList.add('has-file');
           area.innerHTML = `
@@ -402,10 +386,7 @@
 
     function removeFile(event, fileInputId, areaId, placeholderId, dataKey) {
       event.stopPropagation();
-
       imageData[dataKey] = null;
-      const oldInput = document.getElementById(fileInputId);
-      if (oldInput) oldInput.value = '';
 
       const area = document.getElementById(areaId);
       area.classList.remove('has-file');
@@ -416,14 +397,10 @@
           <div class="upload-text"><span>タップして選択</span></div>
         </div>
       `;
-
       area.onclick = () => document.getElementById(fileInputId).click();
       setupFileUpload(fileInputId, areaId, placeholderId, dataKey);
     }
 
-    // ================================================================
-    //  バリデーション
-    // ================================================================
     function isValidUrl(str) {
       try {
         const u = new URL(str);
@@ -437,11 +414,11 @@
       let ok = true;
 
       const checks = [
-        { el: 'shopName',    errEl: 'shopNameError',    test: v => v.trim() !== '' },
+        { el: 'shopName', errEl: 'shopNameError', test: v => v.trim() !== '' },
         { el: 'contactName', errEl: 'contactNameError', test: v => v.trim() !== '' },
-        { el: 'hpUrl',       errEl: 'hpUrlError',       test: v => isValidUrl(v.trim()) },
-        { el: 'gbpUrl',      errEl: 'gbpUrlError',      test: v => isValidUrl(v.trim()) },
-        { el: 'keyword1',    errEl: 'keywordError',     test: v => v.trim() !== '' },
+        { el: 'hpUrl', errEl: 'hpUrlError', test: v => isValidUrl(v.trim()) },
+        { el: 'gbpUrl', errEl: 'gbpUrlError', test: v => isValidUrl(v.trim()) },
+        { el: 'keyword1', errEl: 'keywordError', test: v => v.trim() !== '' }
       ];
 
       checks.forEach(({ el, errEl, test }) => {
@@ -490,45 +467,36 @@
       return ok;
     }
 
-    // ================================================================
-    //  GAS にデータ送信
-    // ================================================================
-    async function submitToGAS(data) {
-      const formData = new URLSearchParams();
-      formData.append('payload', JSON.stringify(data));
+    function submitToGAS(data) {
+      return new Promise((resolve, reject) => {
+        try {
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = GAS_ENDPOINT;
+          form.target = 'gasFrame';
 
-      const response = await fetch(GAS_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-        },
-        body: formData.toString()
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'payload';
+          input.value = JSON.stringify(data);
+          form.appendChild(input);
+
+          document.body.appendChild(form);
+          form.submit();
+          document.body.removeChild(form);
+
+          setTimeout(() => resolve(), 12000);
+        } catch (err) {
+          reject(err);
+        }
       });
-
-      const text = await response.text();
-
-      let json;
-      try {
-        json = JSON.parse(text);
-      } catch (e) {
-        throw new Error('GASからJSON形式の応答が返ってきませんでした: ' + text);
-      }
-
-      if (!json.ok) {
-        throw new Error(json.error || '送信に失敗しました');
-      }
-
-      return json;
     }
 
-    // ================================================================
-    //  送信処理
-    // ================================================================
     document.getElementById('applicationForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
       if (!liffReady || !userId) {
-        showError('LINE認証が完了していません。LINEアプリ内で開き直してください。');
+        showError('LINE認証が完了していません');
         return;
       }
 
@@ -555,36 +523,22 @@
       };
 
       try {
-        const result = await submitToGAS(payload);
-        console.log('GAS result:', result);
+        await submitToGAS(payload);
 
         showLoading(false);
         document.getElementById('formArea').style.display = 'none';
         document.getElementById('headerArea').style.display = 'none';
         document.getElementById('doneScreen').classList.add('show');
 
-        setTimeout(() => {
-          try {
-            if (liff.isInClient()) {
-              liff.closeWindow();
-            }
-          } catch (e) {
-            console.error(e);
-          }
-        }, 2000);
-
       } catch (err) {
-        console.error('Submit error:', err);
+        console.error(err);
         showLoading(false);
         submitBtn.disabled = false;
         submitBtn.textContent = '送信する';
-        showError(err.message || '送信に失敗しました。もう一度お試しください。');
+        showError('送信に失敗しました');
       }
     });
 
-    // ================================================================
-    //  UI ヘルパー
-    // ================================================================
     function showLoading(flag) {
       document.getElementById('loading').classList.toggle('show', flag);
     }
@@ -596,9 +550,6 @@
       setTimeout(() => t.classList.remove('show'), 4000);
     }
 
-    // ================================================================
-    //  初期化
-    // ================================================================
     setupFileUpload('iconFile', 'iconUploadArea', 'iconPlaceholder', 'icon');
     setupFileUpload('bgFile', 'bgUploadArea', 'bgPlaceholder', 'bg');
     initLiff();
