@@ -215,6 +215,13 @@
       </div>
 
       <div class="form-group">
+        <label>URLに含める文字列<span class="required">必須</span></label>
+        <p class="description">専用ページのURLに含める文字を半角アルファベットで入力してください。店舗名の英語表記などがおすすめです。空白は含めず、「-」や「_」で代用してください。</p>
+        <input type="text" id="urlSlug" placeholder="abc_salon" required>
+        <p class="error-msg" id="urlSlugError">半角英数字・-・_ のみ使用できます（スペース不可）</p>
+      </div>
+
+      <div class="form-group">
         <label>担当者名<span class="required">必須</span></label>
         <p class="description">ご担当者様のお名前をご入力ください。</p>
         <input type="text" id="contactName" placeholder="例：山田 太郎" required>
@@ -269,8 +276,8 @@
       </div>
 
       <div class="form-group">
-        <label>アイコン<span class="required">必須</span></label>
-        <p class="description">サロンのアイコン画像をアップロードしてください。（5MB以下 / JPG, PNG, WebP）</p>
+        <label>アイコン</label>
+        <p class="description">サロンのアイコン画像をアップロードしてください。（任意 / 10MB以下 / JPG, PNG, WebP）</p>
         <div class="file-upload-area" id="iconUploadArea" onclick="document.getElementById('iconFile').click()">
           <input type="file" id="iconFile" accept="image/jpeg,image/png,image/webp">
           <div class="upload-placeholder" id="iconPlaceholder">
@@ -278,12 +285,12 @@
             <div class="upload-text"><span>タップして選択</span></div>
           </div>
         </div>
-        <p class="error-msg" id="iconError">アイコン画像を選択してください</p>
+        <p class="error-msg" id="iconError"></p>
       </div>
 
       <div class="form-group">
-        <label>背景画像<span class="required">必須</span></label>
-        <p class="description">背景に使用する画像をアップロードしてください。（5MB以下 / JPG, PNG, WebP）</p>
+        <label>背景画像</label>
+        <p class="description">背景に使用する画像をアップロードしてください。（任意 / 10MB以下 / JPG, PNG, WebP）</p>
         <div class="file-upload-area" id="bgUploadArea" onclick="document.getElementById('bgFile').click()">
           <input type="file" id="bgFile" accept="image/jpeg,image/png,image/webp">
           <div class="upload-placeholder" id="bgPlaceholder">
@@ -291,7 +298,7 @@
             <div class="upload-text"><span>タップして選択</span></div>
           </div>
         </div>
-        <p class="error-msg" id="bgError">背景画像を選択してください</p>
+        <p class="error-msg" id="bgError"></p>
       </div>
 
       <button type="submit" class="submit-btn" id="submitBtn" disabled>LINE認証を確認中...</button>
@@ -314,8 +321,8 @@
   <iframe name="gasFrame" id="gasFrame" style="display:none;"></iframe>
 
   <script>
-    const LIFF_ID      = '2009677249-YKA6DXlo';
-    const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzANJ8fQBAoDNJStrW7RHX-uZEKvhMZ98fsDG0G6BMekxgJozuU9nCcyrDlaElkGQ1MQw/exec';
+    const LIFF_ID       = '2009677249-YKA6DXlo';
+    const GAS_ENDPOINT  = 'https://script.google.com/macros/s/AKfycbzANJ8fQBAoDNJStrW7RHX-uZEKvhMZ98fsDG0G6BMekxgJozuU9nCcyrDlaElkGQ1MQw/exec';
     const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
     let userId = null;
@@ -360,7 +367,7 @@
         if (!file) return;
 
         if (file.size > MAX_FILE_SIZE) {
-          showError('画像は5MB以下にしてください');
+          showError('画像は10MB以下にしてください');
           fileInput.value = '';
           return;
         }
@@ -410,11 +417,16 @@
       }
     }
 
+    function isValidSlug(str) {
+      return /^[A-Za-z0-9_-]+$/.test(str);
+    }
+
     function validateForm() {
       let ok = true;
 
       const checks = [
         { el: 'shopName', errEl: 'shopNameError', test: v => v.trim() !== '' },
+        { el: 'urlSlug', errEl: 'urlSlugError', test: v => v.trim() !== '' && isValidSlug(v.trim()) },
         { el: 'contactName', errEl: 'contactNameError', test: v => v.trim() !== '' },
         { el: 'hpUrl', errEl: 'hpUrlError', test: v => isValidUrl(v.trim()) },
         { el: 'gbpUrl', errEl: 'gbpUrlError', test: v => isValidUrl(v.trim()) },
@@ -442,26 +454,6 @@
       } else {
         radioGroup.classList.remove('error');
         document.getElementById('businessTypeError').style.display = 'none';
-      }
-
-      const iconArea = document.getElementById('iconUploadArea');
-      if (!imageData.icon) {
-        iconArea.classList.add('error');
-        document.getElementById('iconError').style.display = 'block';
-        ok = false;
-      } else {
-        iconArea.classList.remove('error');
-        document.getElementById('iconError').style.display = 'none';
-      }
-
-      const bgArea = document.getElementById('bgUploadArea');
-      if (!imageData.bg) {
-        bgArea.classList.add('error');
-        document.getElementById('bgError').style.display = 'block';
-        ok = false;
-      } else {
-        bgArea.classList.remove('error');
-        document.getElementById('bgError').style.display = 'none';
       }
 
       return ok;
@@ -509,6 +501,7 @@
       const payload = {
         userId: userId,
         shopName: document.getElementById('shopName').value.trim(),
+        urlSlug: document.getElementById('urlSlug').value.trim(),
         contactName: document.getElementById('contactName').value.trim(),
         businessType: document.querySelector('input[name="businessType"]:checked').value,
         hpUrl: document.getElementById('hpUrl').value.trim(),
