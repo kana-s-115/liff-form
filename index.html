@@ -301,6 +301,13 @@
         <p class="error-msg" id="bgError"></p>
       </div>
 
+      <div class="form-group">
+        <label>スタッフ登録<span class="required">必須</span></label>
+        <p class="description">登録したいスタッフ名をカンマ区切りで入力してください。使用できる記号は「,」のみで、空白は含められません。</p>
+        <input type="text" id="staffRegistration" placeholder="佐藤,田中,伊藤" required>
+        <p class="error-msg" id="staffRegistrationError">空白不可、区切り記号は , のみ使用できます</p>
+      </div>
+
       <button type="submit" class="submit-btn" id="submitBtn" disabled>LINE認証を確認中...</button>
     </form>
   </div>
@@ -421,6 +428,10 @@
       return /^[A-Za-z0-9_-]+$/.test(str);
     }
 
+    function isValidStaffRegistration(str) {
+      return /^[A-Za-z0-9ぁ-んァ-ヶー一-龠々〆ヵヶ]+(,[A-Za-z0-9ぁ-んァ-ヶー一-龠々〆ヵヶ]+)*$/.test(str);
+    }
+
     function validateForm() {
       let ok = true;
 
@@ -430,7 +441,8 @@
         { el: 'contactName', errEl: 'contactNameError', test: v => v.trim() !== '' },
         { el: 'hpUrl', errEl: 'hpUrlError', test: v => isValidUrl(v.trim()) },
         { el: 'gbpUrl', errEl: 'gbpUrlError', test: v => isValidUrl(v.trim()) },
-        { el: 'keyword1', errEl: 'keywordError', test: v => v.trim() !== '' }
+        { el: 'keyword1', errEl: 'keywordError', test: v => v.trim() !== '' },
+        { el: 'staffRegistration', errEl: 'staffRegistrationError', test: v => v.trim() !== '' && isValidStaffRegistration(v.trim()) }
       ];
 
       checks.forEach(({ el, errEl, test }) => {
@@ -512,7 +524,8 @@
           document.getElementById('keyword3').value.trim()
         ].filter(Boolean),
         icon: imageData.icon,
-        bgImage: imageData.bg
+        bgImage: imageData.bg,
+        staffRegistration: document.getElementById('staffRegistration').value.trim()
       };
 
       try {
