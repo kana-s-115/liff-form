@@ -208,6 +208,13 @@
     <form id="applicationForm" novalidate>
 
       <div class="form-group">
+        <label>法人名<span class="required">必須</span></label>
+        <p class="description">法人名をご入力ください。複数店舗をご登録される場合、法人名の表記は統一をお願いいたします。</p>
+        <input type="text" id="companyName" placeholder="例：株式会社ABC" required>
+        <p class="error-msg" id="companyNameError">法人名を入力してください</p>
+      </div>
+
+      <div class="form-group">
         <label>店舗名<span class="required">必須</span></label>
         <p class="description">サロン様の店舗名をご入力ください。</p>
         <input type="text" id="shopName" placeholder="例：ヘアサロン ABC 表参道店" required>
@@ -436,6 +443,7 @@
       let ok = true;
 
       const checks = [
+        { el: 'companyName', errEl: 'companyNameError', test: v => v.trim() !== '' },
         { el: 'shopName', errEl: 'shopNameError', test: v => v.trim() !== '' },
         { el: 'urlSlug', errEl: 'urlSlugError', test: v => v.trim() !== '' && isValidSlug(v.trim()) },
         { el: 'contactName', errEl: 'contactNameError', test: v => v.trim() !== '' },
@@ -512,6 +520,7 @@
 
       const payload = {
         userId: userId,
+        companyName: document.getElementById('companyName').value.trim(),
         shopName: document.getElementById('shopName').value.trim(),
         urlSlug: document.getElementById('urlSlug').value.trim(),
         contactName: document.getElementById('contactName').value.trim(),
