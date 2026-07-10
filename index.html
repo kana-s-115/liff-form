@@ -341,7 +341,17 @@
 
     let userId = null;
     let liffReady = false;
+    let isSubmitting = false;
     const imageData = { icon: null, bg: null };
+
+    // 送信ごとに一意のID。回線リトライで同一POSTが再送されても
+    // 同じIDになるため、サーバー側で重複を弾ける。
+    function generateSubmissionId() {
+      if (window.crypto && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+      }
+      return 'sub-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+    }
 
     async function initLiff() {
       const submitBtn = document.getElementById('submitBtn');
@@ -512,13 +522,19 @@
         return;
       }
 
+      // 二重送信ガード（連打・多重発火対策）
+      if (isSubmitting) return;
+
       if (!validateForm()) return;
+
+      isSubmitting = true;
 
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.disabled = true;
       showLoading(true);
 
       const payload = {
+        submissionId: generateSubmissionId(),
         userId: userId,
         companyName: document.getElementById('companyName').value.trim(),
         shopName: document.getElementById('shopName').value.trim(),
@@ -550,6 +566,7 @@
         showLoading(false);
         submitBtn.disabled = false;
         submitBtn.textContent = '送信する';
+        isSubmitting = false; // 失敗時は再送信できるよう解除
         showError('送信に失敗しました');
       }
     });
