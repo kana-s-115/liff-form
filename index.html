@@ -72,6 +72,41 @@
       font-size: 12px; color: #e53935; margin-top: 4px; display: none;
     }
 
+    .notice-box {
+      background: #fff8e1; border: 1.5px solid #ffca28; border-radius: 8px;
+      padding: 12px 14px; margin-bottom: 12px;
+    }
+    .notice-box .notice-title {
+      font-size: 13px; font-weight: 700; color: #8a6d00;
+      display: flex; align-items: center; gap: 6px; margin-bottom: 6px;
+    }
+    .notice-box p {
+      font-size: 12px; color: #6b5900; line-height: 1.6; margin-bottom: 6px;
+    }
+    .notice-box p:last-child { margin-bottom: 0; }
+    .notice-box a {
+      color: #1a73e8; text-decoration: underline; font-weight: 700;
+    }
+    .notice-box .notice-example {
+      font-size: 11.5px; color: #6b5900; background: #fffdf5;
+      border: 1px dashed #ffca28; border-radius: 6px; padding: 6px 8px;
+      word-break: break-all; font-family: monospace;
+    }
+
+    .confirm-check {
+      display: flex; align-items: flex-start; gap: 8px;
+      margin-top: 10px; font-size: 12.5px; color: #333;
+      padding: 10px 12px; border: 1.5px solid #eee; border-radius: 8px;
+      cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    }
+    .confirm-check:has(input:checked) {
+      border-color: #06c755; background: rgba(6,199,85,0.05);
+    }
+    .confirm-check input[type="checkbox"] {
+      width: 18px; height: 18px; accent-color: #06c755; flex-shrink: 0; margin-top: 1px;
+    }
+    .confirm-check.error { border-color: #e53935; }
+
     .radio-group { display: flex; flex-direction: column; gap: 10px; }
     .radio-group label {
       display: flex; align-items: center;
@@ -260,9 +295,19 @@
 
       <div class="form-group">
         <label>Google口コミ用のURL<span class="required">必須</span></label>
-        <p class="description">Google口コミ用URLの取得手順は<a href="https://salon-assist.com/news/795/" target="_blank" rel="noopener">こちら</a>をご確認ください。他の手順でURLを取得した場合、正しく口コミページが開かない場合がございます。</p>
-        <input type="url" id="gbpUrl" placeholder="https://g.page/..." required>
+        <div class="notice-box">
+          <div class="notice-title">⚠️ 必ず手順ページをご確認ください</div>
+          <p>間違った方法で取得したURLを入力される方が非常に多くなっています。入力前に必ず<a href="https://salon-assist.com/news/795/" target="_blank" rel="noopener">取得手順のページ</a>を開き、手順通りに取得してください。</p>
+          <p>正しいURLは次の形式になります（Googleマップの共有URLとは異なります）。</p>
+          <p class="notice-example">https://g.page/r/〇〇〇〇/review</p>
+        </div>
+        <input type="url" id="gbpUrl" placeholder="https://g.page/r/〇〇〇〇/review" required>
         <p class="error-msg" id="gbpUrlError">有効なURLを入力してください</p>
+        <label class="confirm-check" id="gbpConfirmLabel">
+          <input type="checkbox" id="gbpConfirm">
+          <span>手順ページを確認し、正しい形式（https://g.page/r/〇〇〇〇/review）のURLを取得したことを確認しました</span>
+        </label>
+        <p class="error-msg" id="gbpConfirmError">手順ページを確認のうえ、チェックを入れてください</p>
       </div>
 
       <div class="form-group">
@@ -487,6 +532,17 @@
       } else {
         radioGroup.classList.remove('error');
         document.getElementById('businessTypeError').style.display = 'none';
+      }
+
+      const gbpConfirmLabel = document.getElementById('gbpConfirmLabel');
+      const gbpConfirm = document.getElementById('gbpConfirm');
+      if (!gbpConfirm.checked) {
+        gbpConfirmLabel.classList.add('error');
+        document.getElementById('gbpConfirmError').style.display = 'block';
+        ok = false;
+      } else {
+        gbpConfirmLabel.classList.remove('error');
+        document.getElementById('gbpConfirmError').style.display = 'none';
       }
 
       return ok;
